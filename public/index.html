@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Manager</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+
+<body>
+    <h1>Contact Manager</h1>
+
+    <div>
+        <h2>Add/Update Contact</h2>
+        <form id="contactForm">
+            <input type="hidden" id="contactId">
+            <label>Name: <input type="text" id="name" required></label><br>
+            <label>Phone Number: <input type="text" id="phoneNumber" required></label><br>
+            <label>Email: <input type="email" id="email" required></label><br>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <h2>Contact List</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="contactList"></tbody>
+    </table>
+
+    <!-- Contact Details Section -->
+    <div id="contactDetails">
+        <h3>Details:</h3>
+        <p>Name: <span id="detailName"></span></p>
+        <p>Phone Number: <span id="detailPhoneNumber"></span></p>
+        <p>Email: <span id="detailEmail"></span></p>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const contactForm = document.getElementById('contactForm');
+            const contactList = document.getElementById('contactList');
+            const contactDetails = document.getElementById('contactDetails');
+
+            function getContacts() {
+                fetch('/contacts')
+                    .then(response => response.json())
+                    .then(data => {
+                        contactList.innerHTML = data.map(contact => `
+                            <tr>
+                                <td><a href="#" onclick="showDetails('${contact.id}')">${contact.name}</a></td>
+                                <td>
+                                    <button onclick="deleteContact('${contact.id}')">Delete</button>
+                                    <button onclick="editContact('${contact.id}')">Edit</button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    });
+            }
+        
+
+            window.showDetails = function (id) {
+                const contact = fetch(`/contacts/${id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('detailName').textContent = data.name;
+                        document.getElementById('detailPhoneNumber').textContent = data.phoneNumber;
+                        document.getElementById('detailEmail').textContent = data.email;
+                        contactDetails.style.display = 'block';
+                    });
+            }
+
+            window.deleteContact = function (id) {
+                fetch(`/contacts/${id}`, { method: 'DELETE' })
+                    .then(() => getContacts());
+            }
+
+            window.editContact = function (id) {
+                fetch(`/contacts/${id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('contactId').value = data.id;
+                        document.getElementById('name').value = data.name;
+                        document.getElementById('phoneNumber').value = data.phoneNumber;
+                        document.getElementById('email').value = data.email;
+                    });
+            }
+
+            contactForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const id = document.getElementById('contactId').value;
+                const name = document.getElementById('name').value;
+                const phoneNumber = document.getElementById('phoneNumber').value;
+                const email = document.getElementById('email').value;
+
+                const method = id ? 'PUT' : 'POST';
+                const url = id ? `/contacts/${id}` : '/contacts';
+
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, phoneNumber, email })
+                })
+                    .then(() => {
+                        getContacts();
+                        contactForm.reset();
+                        document.getElementById('contactId').value = '';
+                    });
+            });
+
+            getContacts();
+        });
+    </script>
+</body>
+
+</html>

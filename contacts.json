@@ -1,0 +1,14 @@
+[
+  {
+    "id": "e2d28a43-ea0d-421d-9ca0-fa74f2c3a571",
+    "name": "Bjarni Jonsson",
+    "phoneNumber": "777-888-9999",
+    "email": "bgjonsson@mail.fhsu.edu"
+  },
+  {
+    "id": "0b302a4b-a1fc-46ca-9829-b3cf4ac5f997",
+    "name": "John Doe",
+    "phoneNumber": "785-111-2222",
+    "email": "john.doe@example.edu"
+  }
+]
